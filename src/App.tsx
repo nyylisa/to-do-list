@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { TodoList } from './components/TodoList';
-import { Portfolio } from './components/Portfolio';
+// import { Portfolio } from './components/Portfolio';
 import { Notes } from './components/Notes';
 import { PomodoroTimer } from './components/PomodoroTimer';
 import { HabitTracker } from './components/HabitTracker';
 import { Auth } from '@/components/auth'; // Ensure this path matches your file structure
 import { CheckSquare, User, Briefcase, FileText, Timer, Target, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { Profile } from '@/components/profile';
 
 export default function App() {
   // State for Authentication
@@ -106,7 +107,7 @@ export default function App() {
               }}
             >
               <Briefcase size={18} />
-              <span className="hidden sm:inline">Portfolio</span>
+              <span className="hidden sm:inline">Profile</span>
             </button>
 
             {/* Divider */}
@@ -293,7 +294,7 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <Portfolio />
+            <Profile session={session} />
           )}
         </div>
       </main>
