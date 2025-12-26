@@ -233,24 +233,29 @@ export default function App() {
               {/* Feature Content */}
               <div>
                 {/* Hero Section */}
-                {activeFeature === 'tasks' && (
-                  <section className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style={{ backgroundColor: '#1976D2' }}>
-                      <User size={40} color="white" />
-                    </div>
-                    <h2 className="text-4xl mb-3" style={{ color: '#0D47A1' }}>
-                      {session ? `Welcome, ${session.user.email}` : 'Welcome to My Productivity Hub'}
-                    </h2>
-                    <p className="text-xl mb-2" style={{ color: '#0D47A1' }}>
-                      {session ? 'Here is your personal dashboard' : 'An individual project by a passionate developer'}
-                    </p>
-                    {!session && (
-                      <p className="text-lg opacity-80" style={{ color: '#0D47A1' }}>
-                        Please Sign In to access your tools
-                      </p>
-                    )}
-                  </section>
-                )}
+{activeFeature === 'tasks' && (
+  <section className="text-center mb-8">
+    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style={{ backgroundColor: '#1976D2' }}>
+      <User size={40} color="white" />
+    </div>
+    
+    {/* UPDATED WELCOME MESSAGE */}
+    <h2 className="text-4xl mb-3" style={{ color: '#0D47A1' }}>
+      {session 
+        ? `Welcome, ${session.user.user_metadata?.full_name || session.user.email}` 
+        : 'Welcome to My Productivity Hub'}
+    </h2>
+    
+    <p className="text-xl mb-2" style={{ color: '#0D47A1' }}>
+      {session ? 'Here is your personal dashboard' : 'An individual project by a passionate developer'}
+    </p>
+    {!session && (
+       <p className="text-lg opacity-80" style={{ color: '#0D47A1' }}>
+         Please Sign In to access your tools
+       </p>
+    )}
+  </section>
+)}
 
                 {/* 3. Render Features ONLY if logged in */}
                 {session ? (

@@ -1,6 +1,27 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Lock, Mail, CheckCircle } from 'lucide-react';
+import { Loader2, Lock, Mail, CheckCircle, User } from 'lucide-react';
+
+// --- FIX: Component moved OUTSIDE the main Auth function ---
+const InputField = ({ icon: Icon, type, value, onChange, placeholder, required = true }: any) => (
+  <div 
+    className="flex items-center w-full border-2 rounded-lg transition-colors focus-within:border-[#1976D2] bg-white overflow-hidden"
+    style={{ borderColor: '#E3F2FD' }}
+  >
+    <div className="pl-3 py-2">
+      <Icon className="h-5 w-5 text-gray-400" />
+    </div>
+    <input
+      type={type}
+      required={required}
+      value={value}
+      onChange={onChange}
+      className="w-full px-3 py-2 outline-none text-gray-700 placeholder-gray-400 bg-transparent"
+      placeholder={placeholder}
+    />
+  </div>
+);
+// -----------------------------------------------------------
 
 interface AuthProps {
   defaultIsSignUp?: boolean; 
@@ -10,6 +31,7 @@ export function Auth({ defaultIsSignUp = false }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState(''); 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(defaultIsSignUp);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +40,7 @@ export function Auth({ defaultIsSignUp = false }: AuthProps) {
     setIsSignUp(defaultIsSignUp);
     setError(null);
     setConfirmPassword('');
+    setFullName('');
   }, [defaultIsSignUp]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -25,6 +48,7 @@ export function Auth({ defaultIsSignUp = false }: AuthProps) {
     setLoading(true);
     setError(null);
 
+    // Validation
     if (isSignUp && password !== confirmPassword) {
       setError("Passwords do not match");
       setLoading(false);
@@ -33,11 +57,24 @@ export function Auth({ defaultIsSignUp = false }: AuthProps) {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        // Sign Up with Name
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName, 
+            },
+          },
+        });
         if (error) throw error;
         alert('Success! Check your email for the login link.');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // Sign In
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
         if (error) throw error;
       }
     } catch (error: any) {
@@ -46,27 +83,6 @@ export function Auth({ defaultIsSignUp = false }: AuthProps) {
       setLoading(false);
     }
   };
-
-  // Helper component to ensure consistent input styling
-  // This uses Flexbox to keep Icon and Input strictly side-by-side
-  const InputField = ({ icon: Icon, type, value, onChange, placeholder, required = true }: any) => (
-    <div 
-      className="flex items-center w-full border-2 rounded-lg transition-colors focus-within:border-[#1976D2] bg-white overflow-hidden"
-      style={{ borderColor: '#E3F2FD' }}
-    >
-      <div className="pl-3 py-2">
-        <Icon className="h-5 w-5 text-gray-400" />
-      </div>
-      <input
-        type={type}
-        required={required}
-        value={value}
-        onChange={onChange}
-        className="w-full px-3 py-2 outline-none text-gray-700 placeholder-gray-400 bg-transparent"
-        placeholder={placeholder}
-      />
-    </div>
-  );
 
   return (
     <div className="flex items-center justify-center min-h-[50vh] p-4">
@@ -77,6 +93,20 @@ export function Auth({ defaultIsSignUp = false }: AuthProps) {
 
         <form onSubmit={handleAuth} className="space-y-4">
           
+          {/* Name Field (Only for Sign Up) */}
+          {isSignUp && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="block text-sm font-medium mb-1" style={{ color: '#0D47A1' }}>Full Name</label>
+              <InputField 
+                icon={User}
+                type="text"
+                value={fullName}
+                onChange={(e: any) => setFullName(e.target.value)}
+                placeholder="John Doe"
+              />
+            </div>
+          )}
+
           {/* Email Field */}
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: '#0D47A1' }}>Email</label>
