@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { LogOut } from 'lucide-react';
 
 interface ProfileProps {
   session: any;
@@ -10,6 +11,7 @@ export function Profile({ session }: ProfileProps) {
   const [fullName, setFullName] = useState('');
   const [bio, setBio] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [buttonText, setButtonText] = useState('Sign Out');
 
   // Load Data
   useEffect(() => {
@@ -19,6 +21,17 @@ export function Profile({ session }: ProfileProps) {
       setBio(userBio || '');
     }
   }, [session]);
+
+  // --- SAFETY CHECK ---
+  // Keeps the page from going blank if data is loading
+  if (!session || !session.user) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
+        <h2 className="text-2xl font-bold text-gray-700 mb-2">Please Sign In</h2>
+        <p className="text-gray-500">You need to be logged in to view your profile.</p>
+      </div>
+    );
+  }
 
   // Handle Save
   const handleSave = async () => {
@@ -33,7 +46,6 @@ export function Profile({ session }: ProfileProps) {
 
       if (error) throw error;
 
-      // Show Success Animation
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       
@@ -45,22 +57,29 @@ export function Profile({ session }: ProfileProps) {
     }
   };
 
+  const handleSignOut = async () => {
+    setButtonText('Signed Out ✓');
+    setTimeout(async () => {
+      await supabase.auth.signOut();
+    }, 1000);
+  };
+
+  const memberSince = new Date(session.user.created_at).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center p-4">
       
       {/* Modal Container */}
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 py-4">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 py-8">
         
-        {/* Cover Image (SVG) */}
-        
+        {/* Profile Content (No Images) */}
+        <div className="relative px-8">
 
-        {/* Profile Content */}
-        <div className="relative px-8 pb-8">
-        
-
-          {/* User Info (Read Only Header) */}
-          <div className="text-center mb-6">
+          {/* User Info Header */}
+          <div className="text-center mb-8">
             <h1 className="text-2xl font-bold mb-1 text-gray-800">
               {fullName || 'User'}
             </h1>
@@ -75,11 +94,11 @@ export function Profile({ session }: ProfileProps) {
                 : 'opacity-0 -translate-y-2 h-0 overflow-hidden'
             }`}
           >
-        
+             ✓ Profile updated successfully!
           </div>
 
           {/* Edit Form */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-4 mb-8">
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">Display Name</label>
               <input 
@@ -106,13 +125,32 @@ export function Profile({ session }: ProfileProps) {
               onClick={handleSave}
               disabled={loading}
               className="w-full py-3 rounded-lg font-semibold text-white transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
-              style={{ backgroundColor: '#6366f1' }} // Indigo-500
+              style={{ backgroundColor: '#6366f1' }}
             >
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
 
-          
+          {/* Footer Info (Sign Out) */}
+          <div className="grid grid-cols-2 gap-4 pt-6 border-t-2 border-gray-100">
+            <div>
+              <p className="text-xs font-medium mb-1 text-gray-500">Member Since</p>
+              <p className="text-sm font-semibold text-gray-800">{memberSince}</p>
+            </div>
+            <div className="flex items-end justify-end">
+              <button 
+                onClick={handleSignOut}
+                className={`px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+                  buttonText.includes('✓') 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-red-50 text-red-600 hover:bg-red-100'
+                }`}
+              >
+                {buttonText === 'Sign Out' && <LogOut size={16} />}
+                {buttonText}
+              </button>
+            </div>
+          </div>
 
         </div>
       </div>
